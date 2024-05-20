@@ -35,7 +35,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 Route::group(['middleware' => ['api'],'prefix' => '/collager'], function () {
   Route::post('/register', [UserController::class, 'api_collagerRegister']);
-Route::post('/login', [UserController::class, 'api_collagerLogin']);
+  Route::post('/login', [UserController::class, 'api_collagerLogin']);
   Route::post('/forgot-password', 'Auth\ForgotPasswordAPIController');
   Route::get('/version', [VersionAppController::class, 'api_index']);
   Route::get('/school', [SchoolController::class, 'api_index']);
@@ -57,7 +57,7 @@ Route::group(['middleware' => ['auth:api'],'prefix' => '/collager'], function ()
   Route::get('/quiz/{quiztype_id}', [QuizController::class, 'api_index']);
   Route::get('/question/{quiz_id}', [QuestionController::class, 'api_index']);
   Route::post('/question/{quiz_id}', [QuestionController::class, 'api_store']);
-  Route::get('/question/code/{code}', [QuizController::class, 'api_indexByCode']);
+  Route::get('/question/code-web/{code}', [QuizController::class, 'api_indexByCode']);
   
   Route::get('/find-quizcategory/{id_quizcategory}', [QuizCategoryController::class, 'api_show']);
   Route::get('/find-quiztype/{id_quiztype}', [QuizTypeController::class, 'api_show']);

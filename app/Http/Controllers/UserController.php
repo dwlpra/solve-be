@@ -307,45 +307,47 @@ class UserController extends Controller
      ]);
    }
 
-   public function api_collagerLogin(Request $request){
-    if(Auth::attempt([
-      'email' => request('email'),
-      'password' => request('password'),
-
-    ]))
-    {
-        $user = Auth::user();
-        if ($user->hasRole('student')) {
-          $email = $request->get('email');
-          $password = $request->get('password');
-
-          $success['token'] =  $user->createToken('MyApp')-> accessToken;
-          $success['email'] = $email;
-          $success['password'] = $password;
-
-          $collager = User::where('email', $success['email'])->with('collager')->first();
-          $collager->token = $success['token'];
-          // $collager->foto= asset('images/'.$collager->foto.'');
-
-          return response()->json([
-              'status'=>'success',
-              'user' => $collager
-          ]);
-        }
-        else {
-          $success['status'] = 'failed';
-          $success['error'] = 'Unauthorized';
-          $success['message'] = 'Your email or password incorrect!';
-          return response()->json($success,401);
-        }
-    }
-    else{
-        $success['status'] = 'failed';
-        $success['error'] = 'Unauthorized';
-        $success['message'] = 'Your email or password incorrect!';
-        return response()->json($success,401);
-    }
-  }
+   public function api_collagerLogin(Request $request)
+   {
+       // Coba autentikasi pengguna dengan kredensial yang diberikan
+       if (!Auth::attempt($request->only('email', 'password'))) {
+           return $this->sendErrorResponse('Your email or password is incorrect!', 401);
+       }
+   
+       $user = Auth::user(); // Mendapatkan objek pengguna yang diautentikasi
+   
+       // Periksa apakah pengguna memiliki peran 'student'
+       if (!$user->hasRole('student')) {
+           return $this->sendErrorResponse('Unauthorized access!', 401);
+       }
+   
+       $token = $user->createToken('MyApp')->accessToken;
+   
+       // Dapatkan pengguna dengan relasi 'collager'
+       $collager = User::where('email', $request->email)->with('collager')->first();
+       $collager->token = $token;
+   
+       return response()->json([
+           'status' => 'success',
+           'user' => $collager
+       ]);
+   }
+   
+   /**
+    * Mengirimkan respons error dalam format JSON.
+    *
+    * @param string $message
+    * @param int $statusCode
+    * @return \Illuminate\Http\JsonResponse
+    */
+   private function sendErrorResponse($message, $statusCode)
+   {
+       return response()->json([
+           'status' => 'failed',
+           'error' => 'Unauthorized',
+           'message' => $message
+       ], $statusCode);
+   }
 
   public function api_logout(Request $request)
    {
